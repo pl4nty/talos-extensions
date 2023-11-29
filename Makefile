@@ -14,6 +14,8 @@ GOARCH := $(shell uname -m | tr '[:upper:]' '[:lower:]')
 
 ifeq ($(GOARCH),x86_64)
   GOARCH := amd64
+else ifeq ($(GOARCH),aarch64)
+	GOARCH := arm64
 endif
 REGISTRY ?= ghcr.io
 USERNAME ?= siderolabs
