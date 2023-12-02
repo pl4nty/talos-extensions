@@ -16,4 +16,4 @@ vars:
   ZLIB_VERSION: 1.2.13
 
 labels:
-  org.opencontainers.image.source: https://github.com/pl4nty/extensions
+  org.opencontainers.image.source: https://github.com/pl4nty/talos-extensions
