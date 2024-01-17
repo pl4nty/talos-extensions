@@ -41,6 +41,7 @@ spec:
   extraBuildArgs:
     - TAG
     - PKGS
+    - PKGS_PREFIX
   useBldrPkgTagResolver: true
 ---
 kind: common.Build
