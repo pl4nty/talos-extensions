@@ -41,6 +41,7 @@ spec:
   extraBuildArgs:
     - TAG
     - PKGS
+    - PKGS_PREFIX
   useBldrPkgTagResolver: true
 ---
 kind: common.Build
@@ -73,7 +74,9 @@ spec:
       - name: EXTENSIONS_IMAGE_REF
         defaultValue: $(REGISTRY_AND_USERNAME)/extensions:$(TAG)
       - name: PKGS
-        defaultValue: v1.6.0-25-g6868f38
+        defaultValue: v1.7.0-alpha.0-13-gf376a53
+      - name: PKGS_PREFIX
+        defaultValue: ghcr.io/siderolabs
     depends:
       - internal/extensions/descriptions.yaml
     script:
