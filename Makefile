@@ -57,7 +57,6 @@ TARGETS += bnx2-bnx2x
 TARGETS += btrfs
 TARGETS += chelsio-drivers
 TARGETS += chelsio-firmware
-TARGETS += drbd
 TARGETS += ecr-credential-provider
 TARGETS += fuse3
 TARGETS += gasket-driver
@@ -81,7 +80,6 @@ TARGETS += thunderbolt
 TARGETS += usb-modem-drivers
 TARGETS += util-linux-tools
 TARGETS += xe-guest-utilities
-TARGETS += zfs
 NONFREE_TARGETS = nonfree-kmod-nvidia
 
 # extra variables

@@ -9,7 +9,7 @@ spec:
     - btrfs
     - chelsio-drivers
     - chelsio-firmware
-    - drbd
+    # - drbd see https://github.com/siderolabs/pkgs/pull/873
     - ecr-credential-provider
     - fuse3
     - gasket-driver
@@ -33,7 +33,7 @@ spec:
     - usb-modem-drivers
     - util-linux-tools
     - xe-guest-utilities
-    - zfs
+    # - zfs see https://github.com/siderolabs/pkgs/pull/873
   additionalTargets:
     nonfree:
       - nonfree-kmod-nvidia
