@@ -6,10 +6,9 @@ env:
   USERNAME: ${{ github.repository_owner }}
   PLATFORM: linux/arm64
   PKGS_PREFIX: ghcr.io/${{ github.repository_owner }}
-  # PKGS: 
+  PKGS: v1.6.6-orangepi5
   CI_ARGS: --provenance=true
-  TARGETS: ""
-  NONFREE_TARGETS: ""
+  TARGETS: chelsio-drivers thunderbolt usb-modem-drivers binfmt-misc btrfs rk3588
 
 name: default
 concurrency:
