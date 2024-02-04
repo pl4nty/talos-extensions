@@ -8,7 +8,7 @@ env:
   PKGS_PREFIX: ghcr.io/${{ github.repository_owner }}
   PKGS: v1.6.5-orangepi5
   CI_ARGS: --provenance=true
-  TARGETS: chelsio-drivers thunderbolt usb-modem-drivers binfmt-misc btrfs rk3588
+  TARGETS: chelsio-drivers thunderbolt usb-modem-drivers binfmt-misc btrfs
 
 name: default
 concurrency:
