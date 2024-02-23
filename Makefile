@@ -201,12 +201,12 @@ internal/extensions/descriptions.yaml: internal/extensions/image-digests
 	@echo "Generating image descriptions..."
 	@echo -n "" > internal/extensions/descriptions.yaml
 	@for image in $(shell cat internal/extensions/image-digests); do \
-	  crane export $$image - | tar x -O --occurrence=1 manifest.yaml | yq -r ". += {\"$$image\": {\"author\": .metadata.author, \"description\": .metadata.description}} | del(.metadata, .version)" - >> internal/extensions/descriptions.yaml; \
+	  crane export $$image --platform linux/arm64 - | tar x -O --occurrence=1 manifest.yaml | yq -r ". += {\"$$image\": {\"author\": .metadata.author, \"description\": .metadata.description}} | del(.metadata, .version)" - >> internal/extensions/descriptions.yaml; \
 	done
 
 .PHONY: sign-images
 sign-images:
-	@for image in $(shell crane export $(EXTENSIONS_IMAGE_REF) | tar x --to-stdout image-digests) $(EXTENSIONS_IMAGE_REF)@$$(crane digest $(EXTENSIONS_IMAGE_REF)); do \
+	@for image in $(shell crane export $(EXTENSIONS_IMAGE_REF) --platform linux/arm64 | tar x --to-stdout image-digests) $(EXTENSIONS_IMAGE_REF)@$$(crane digest $(EXTENSIONS_IMAGE_REF)); do \
 	  echo '==>' $$image; \
 	  cosign verify $$image --certificate-identity-regexp '@siderolabs\.com$$' --certificate-oidc-issuer https://accounts.google.com || \
 	    cosign sign --yes $$image; \
