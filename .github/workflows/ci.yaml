@@ -2,6 +2,15 @@
 #
 # Generated on 2024-02-21T10:59:05Z by kres latest.
 
+env:
+  USERNAME: ${{ github.repository_owner }}
+  PLATFORM: linux/arm64
+  PKGS_PREFIX: ghcr.io/${{ github.repository_owner }}
+  # PKGS: 
+  CI_ARGS: --provenance=true
+  TARGETS: ""
+  NONFREE_TARGETS: ""
+
 name: default
 concurrency:
   group: ${{ github.head_ref || github.run_id }}
@@ -25,9 +34,9 @@ jobs:
       issues: read
       packages: write
       pull-requests: read
+      id-token: write
     runs-on:
-      - self-hosted
-      - pkgs
+      - ubuntu-latest
     if: (!startsWith(github.head_ref, 'renovate/') && !startsWith(github.head_ref, 'dependabot/'))
     outputs:
       labels: ${{ steps.retrieve-pr-labels.outputs.result }}
@@ -46,20 +55,16 @@ jobs:
       - name: Unshallow
         run: |
           git fetch --prune --unshallow
+      - name: Set up Namespace CLI
+        uses: namespacelabs/nscloud-setup@v0
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          append: |
-            - endpoint: tcp://buildkit-arm64.ci.svc.cluster.local:1234
-              platforms: linux/arm64
-          driver: remote
-          endpoint: tcp://localhost:1234
+        uses: namespacelabs/nscloud-setup-buildx-action@v0
       - name: Build
         run: |
-          make
+          make TARGETS="${{ env.TARGETS }}"
       - name: Build nonfree
         run: |
-          make nonfree
+          make nonfree NONFREE_TARGETS="${{ env.NONFREE_TARGETS }}"
       - name: Login to registry
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
@@ -70,11 +75,11 @@ jobs:
       - name: Push to registry
         if: github.event_name != 'pull_request'
         run: |
-          make  PUSH=true
+          make PUSH=true TARGETS="${{ env.TARGETS }}"
       - name: Push nonfree
         if: github.event_name != 'pull_request'
         run: |
-          make nonfree PUSH=true
+          make nonfree PUSH=true NONFREE_TARGETS="${{ env.NONFREE_TARGETS }}"
       - name: Retrieve PR labels
         id: retrieve-pr-labels
         uses: actions/github-script@v7
@@ -90,21 +95,28 @@ jobs:
             })
 
             return resp.data.labels.map(label => label.name)
+      - name: Set up crane
+        if: github.event_name != 'pull_request'
+        run: |
+          curl -sL "https://github.com/google/go-containerregistry/releases/latest/download/go-containerregistry_Linux_x86_64.tar.gz" > go-containerregistry.tar.gz
+          tar -zxvf go-containerregistry.tar.gz -C /usr/local/bin/ crane
       - name: extensions
         if: github.event_name != 'pull_request'
         env:
           PUSH: "true"
         run: |
-          make extensions
-      - name: release-notes
-        if: startsWith(github.ref, 'refs/tags/')
+          make extensions TARGETS="${{ env.TARGETS }}" NONFREE_TARGETS="${{ env.NONFREE_TARGETS }}"
+      - name: Set up cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v3.3.0
+      - name: Sign images
+        if: github.event_name != 'pull_request'
         run: |
-          make release-notes
+          make sign-images
       - name: Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: crazy-max/ghaction-github-release@v2
         with:
-          body_path: _out/RELEASE_NOTES.md
           draft: "true"
   reproducibility:
     runs-on:
