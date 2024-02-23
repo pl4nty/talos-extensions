@@ -18,6 +18,7 @@ endif
 REGISTRY ?= ghcr.io
 USERNAME ?= siderolabs
 REGISTRY_AND_USERNAME ?= $(REGISTRY)/$(USERNAME)
+UPSTREAM_REGISTRY_AND_USERNAME ?=
 KRES_IMAGE ?= ghcr.io/siderolabs/kres:latest
 CONFORMANCE_IMAGE ?= ghcr.io/siderolabs/conform:latest
 
@@ -94,6 +95,7 @@ TARGETS += wasmedge
 TARGETS += xen-guest-agent
 TARGETS += zfs
 NONFREE_TARGETS = nonfree-kmod-nvidia
+UPSTREAM_TARGETS ?=
 
 # help menu
 
@@ -197,6 +199,7 @@ extensions-metadata: $(ARTIFACTS)/bldr
 	@rm -f _out/extensions-metadata
 	@$(foreach target,$(TARGETS),echo $(REGISTRY)/$(USERNAME)/$(target):$(shell $(ARTIFACTS)/bldr eval --target $(target) --build-arg TAG=$(TAG) '{{.VERSION}}' 2>/dev/null) >> _out/extensions-metadata;)
 	@$(foreach target,$(NONFREE_TARGETS),echo $(REGISTRY)/$(USERNAME)/$(target):$(shell $(ARTIFACTS)/bldr eval --target $(target) --build-arg TAG=$(TAG) '{{.VERSION}}' 2>/dev/null) >> _out/extensions-metadata;)
+	@$(foreach target,$(UPSTREAM_TARGETS),echo $(UPSTREAM_REGISTRY_AND_USERNAME)/$(target):$(shell $(ARTIFACTS)/bldr eval --target $(target) --build-arg TAG=$(TAG) '{{.VERSION}}' 2>/dev/null) >> _out/extensions-metadata;)
 
 .PHONY: internal/extensions/image-digests
 internal/extensions/image-digests: extensions-metadata
@@ -208,12 +211,12 @@ internal/extensions/descriptions.yaml: internal/extensions/image-digests
 	@echo "Generating image descriptions..."
 	@echo -n "" > internal/extensions/descriptions.yaml
 	@for image in $(shell cat internal/extensions/image-digests); do \
-	  crane export $$image - | tar x -O --occurrence=1 manifest.yaml | yq -r ". += {\"$$image\": {\"author\": .metadata.author, \"description\": .metadata.description}} | del(.metadata, .version)" - >> internal/extensions/descriptions.yaml; \
+	  crane export $$image --platform linux/arm64 - | tar x -O --occurrence=1 manifest.yaml | yq -r ". += {\"$$image\": {\"author\": .metadata.author, \"description\": .metadata.description}} | del(.metadata, .version)" - >> internal/extensions/descriptions.yaml; \
 	done
 
 .PHONY: sign-images
 sign-images:
-	@for image in $(shell crane export $(EXTENSIONS_IMAGE_REF) | tar x --to-stdout image-digests) $(EXTENSIONS_IMAGE_REF)@$$(crane digest $(EXTENSIONS_IMAGE_REF)); do \
+	@for image in $(shell crane export $(EXTENSIONS_IMAGE_REF) --platform linux/arm64 | tar x --to-stdout image-digests) $(EXTENSIONS_IMAGE_REF)@$$(crane digest $(EXTENSIONS_IMAGE_REF)); do \
 	  echo '==>' $$image; \
 	  cosign verify $$image --certificate-identity-regexp '@siderolabs\.com$$' --certificate-oidc-issuer https://accounts.google.com || \
 	    cosign sign --yes $$image; \
