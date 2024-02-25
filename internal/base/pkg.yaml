@@ -2,8 +2,8 @@ name: base
 variant: scratch
 shell: /toolchain/bin/bash
 dependencies:
-  - image: "ghcr.io/siderolabs/base:{{ .BUILD_ARG_PKGS }}"
-  - image: "ghcr.io/siderolabs/ca-certificates:{{ .BUILD_ARG_PKGS }}"
+  - image: "ghcr.io/siderolabs/base:v1.6.0-25-g6868f38"
+  - image: "ghcr.io/siderolabs/ca-certificates:v1.6.0-25-g6868f38"
 finalize:
   - from: /
     to: /
